@@ -1,0 +1,94 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-framework",
+      "CoreVideo",
+      "-framework",
+      "IOKit",
+      "-framework",
+      "Cocoa",
+      "-framework",
+      "GLUT",
+      "-framework",
+      "OpenGL",
+      "-Iinclude",
+      "-o",
+      "bin/sanic",
+      "src/environment.c"
+    ],
+    "directory": "/Users/matty/projects/sanic",
+    "file": "/Users/matty/projects/sanic/src/environment.c",
+    "output": "/Users/matty/projects/sanic/bin/sanic"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-framework",
+      "CoreVideo",
+      "-framework",
+      "IOKit",
+      "-framework",
+      "Cocoa",
+      "-framework",
+      "GLUT",
+      "-framework",
+      "OpenGL",
+      "-Iinclude",
+      "-o",
+      "bin/sanic",
+      "src/main.c"
+    ],
+    "directory": "/Users/matty/projects/sanic",
+    "file": "/Users/matty/projects/sanic/src/main.c",
+    "output": "/Users/matty/projects/sanic/bin/sanic"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-framework",
+      "CoreVideo",
+      "-framework",
+      "IOKit",
+      "-framework",
+      "Cocoa",
+      "-framework",
+      "GLUT",
+      "-framework",
+      "OpenGL",
+      "-Iinclude",
+      "-o",
+      "bin/sanic",
+      "src/object.c"
+    ],
+    "directory": "/Users/matty/projects/sanic",
+    "file": "/Users/matty/projects/sanic/src/object.c",
+    "output": "/Users/matty/projects/sanic/bin/sanic"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-framework",
+      "CoreVideo",
+      "-framework",
+      "IOKit",
+      "-framework",
+      "Cocoa",
+      "-framework",
+      "GLUT",
+      "-framework",
+      "OpenGL",
+      "-Iinclude",
+      "-o",
+      "bin/sanic",
+      "src/player.c"
+    ],
+    "directory": "/Users/matty/projects/sanic",
+    "file": "/Users/matty/projects/sanic/src/player.c",
+    "output": "/Users/matty/projects/sanic/bin/sanic"
+  }
+]
