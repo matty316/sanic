@@ -5,7 +5,8 @@ project(sanic)
 set(CMAKE_C_STANDARD 11)
 
 file(GLOB SOURCES "${CMAKE_SOURCE_DIR}/src/*.c")
-add_executable(sanic ${SOURCES})
+file(GLOB INCLUDES "${CMAKE_SOURCE_DIR}/include/*.h")
+add_executable(sanic ${SOURCES} ${INCLUDES})
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(sanic ${CMAKE_SOURCE_DIR}/lib/libraylib.a)
