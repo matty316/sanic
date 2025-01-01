@@ -1,0 +1,3 @@
+/Users/matty/projects/sanic/build/CMakeFiles/sanic.dir
+/Users/matty/projects/sanic/build/CMakeFiles/edit_cache.dir
+/Users/matty/projects/sanic/build/CMakeFiles/rebuild_cache.dir
