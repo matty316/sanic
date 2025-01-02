@@ -35,27 +35,27 @@ void initCamera(Camera2D *camera, Player *player) {
 
 void updatePlayer(Player* player, float deltaTime, LevelEnv* env) {
 	if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) {
-		if (player->object.position.x + player->object.widthRadius <= env->maxX && player->state == Standing) {
-			player->object.position.x += GROUND_SPEED * deltaTime;
-			player->object.speed.x = GROUND_SPEED;
+		if (player->object.position.x + player->object.widthRadius + 1 <= env->maxX && player->state == Standing) {
+			player->object.speed.x += GROUND_SPEED;
 		}
-		else if (player->object.position.x + player->object.widthRadius <= env->maxX && player->state == Jumping) {
-			player->object.position.x += AIR_SPEED * deltaTime;
+		else if (player->object.position.x + player->object.widthRadius - 1 <= env->maxX && player->state == Jumping) {
 			player->object.speed.x = AIR_SPEED;
 		}
 	}
 
 	if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) {
-		if (player->object.position.x - player->object.widthRadius >= env->minX && player->state == Standing) {
-			player->object.position.x -= GROUND_SPEED * deltaTime;
-			player->object.speed.x = -GROUND_SPEED;
-		}
+        if (player->object.position.x - player->object.widthRadius >= env->minX && player->state == Standing) {
+            player->object.speed.x -= GROUND_SPEED;
+        }
 		else if (player->object.position.x - player->object.widthRadius >= env->minX && player->state == Jumping) {
-			player->object.position.x -= AIR_SPEED * deltaTime;
 			player->object.speed.x = -AIR_SPEED;
 		}
 	}
-
+    
+    if (player->state == Standing) {
+        player->object.position.x += player->object.speed.x * deltaTime;
+    }
+    
 	if (IsKeyDown(KEY_SPACE) && player->state == Standing) {
 		player->object.speed.y = -VERTICAL_SPEED;
 		player->state = Jumping;
@@ -64,7 +64,7 @@ void updatePlayer(Player* player, float deltaTime, LevelEnv* env) {
     bool hitObstacle = false;
 	for (int i = 0; i < env->count; i++) {
 		Tile tile = env->tiles[i];
-		float tileY = tile.position.y * SCALE * TILE_SIZE;
+        float tileY = tile.position.y * tileLen() - 1;
 		float tileX = tile.position.x * tileLen();
 		if (tileX <= player->object.position.x &&
 			tileX + tileLen() >= player->object.position.x &&
@@ -87,6 +87,7 @@ void updatePlayer(Player* player, float deltaTime, LevelEnv* env) {
         player->state = Jumping;
     }
     else player->state = Standing;
+    
 }
 
 void updateCamera(Camera2D* camera, Player* player, LevelEnv* env) {

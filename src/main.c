@@ -19,7 +19,7 @@ int main ()
     SetTargetFPS(60);
 	
 	// game loop
-	while (!WindowShouldClose())	// run the loop untill the user presses ESCAPE or presses the Close button on the window
+	while (!WindowShouldClose())
 	{
 		float deltaTime = GetFrameTime();
 		updatePlayer(&player, deltaTime, &env);
@@ -27,7 +27,7 @@ int main ()
 		
 		BeginDrawing();
 
-		ClearBackground(BLACK);
+        ClearBackground(SKYBLUE);
 		BeginMode2D(camera);
 		drawEnv(&env);
 		drawPlayer(&player);
