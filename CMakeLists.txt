@@ -9,8 +9,7 @@ file(GLOB INCLUDES "${CMAKE_SOURCE_DIR}/include/*.h")
 add_executable(sanic ${SOURCES} ${INCLUDES})
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
-link_directories(${CMAKE_SOURCE_DIR}/lib)
-target_link_libraries(sanic raylib)
+target_link_libraries(sanic ${CMAKE_SOURCE_DIR}/lib/libraylib.a)
 
 if (APPLE)
     target_link_libraries(sanic "-framework IOKit")
