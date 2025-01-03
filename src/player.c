@@ -1,10 +1,17 @@
 #include "player.h"
 #include "common.h"
+#include "raymath.h"
+#include <stdio.h>
 
-#define VERTICAL_SPEED 350
-#define AIR_SPEED 100
-#define GROUND_SPEED 300
-#define GRAVITY 400
+#define acceleration_speed	0.046875f * SCALE
+#define deceleration_speed	0.5f * SCALE
+#define friction_speed	0.046875f * SCALE
+#define air_acceleration_speed	0.09375f * SCALE
+#define gravity_force	0.21875f * SCALE
+#define jump_force 6.5f * SCALE
+#define top_speed	6.f * SCALE
+
+float lastY = 0;
 
 void initPlayer(Player* player) {
 	player->object.position.x = SCREEN_WIDTH / 2.0f;
@@ -15,14 +22,7 @@ void initPlayer(Player* player) {
     player->object.groundSpeed = 0;
     player->object.speed.x = 0;
     player->object.speed.y = 0;
-	player->object.hitbox.x = 0;
-	player->object.hitbox.y = 0;
-	player->object.hitbox.width = 20;
-	player->object.hitbox.height = 40;
-	player->object.bounds.x = 0;
-	player->object.bounds.y = 0;
-	player->object.bounds.width = player->object.widthRadius * 2 + 1;
-	player->object.bounds.height = player->object.heightRadius * 2 + 1;
+	player->ascending = false;
 	player->state = Jumping;
 }
 
@@ -34,60 +34,91 @@ void initCamera(Camera2D *camera, Player *player) {
 }
 
 void updatePlayer(Player* player, float deltaTime, LevelEnv* env) {
-	if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) {
-		if (player->object.position.x + player->object.widthRadius + 1 <= env->maxX && player->state == Standing) {
-			player->object.speed.x += GROUND_SPEED;
+	switch (player->state) {
+	case Jumping: {
+		player->ascending = player->object.position.y <= lastY;
+		if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) {
+			player->object.speed.x -= air_acceleration_speed;
+			if (player->object.speed.x <= -top_speed) {
+				player->object.speed.x = -top_speed;
+			}
 		}
-		else if (player->object.position.x + player->object.widthRadius - 1 <= env->maxX && player->state == Jumping) {
-			player->object.speed.x = AIR_SPEED;
+		if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) {
+			player->object.speed.x += air_acceleration_speed;
+			if (player->object.speed.x >= top_speed) {
+				player->object.speed.x = top_speed;
+			}
 		}
-	}
+		player->object.position.y += player->object.speed.y * deltaTime * GetFPS();
+		player->object.position.x += player->object.speed.x * deltaTime * GetFPS();
+		player->object.speed.y += gravity_force;
+		if (player->object.speed.y > 16.f) {
+			player->object.speed.y = 16.f;
+		}
 
-	if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) {
-        if (player->object.position.x - player->object.widthRadius >= env->minX && player->state == Standing) {
-            player->object.speed.x -= GROUND_SPEED;
-        }
-		else if (player->object.position.x - player->object.widthRadius >= env->minX && player->state == Jumping) {
-			player->object.speed.x = -AIR_SPEED;
-		}
+		break;
 	}
-    
-    if (player->state == Standing) {
-        player->object.position.x += player->object.speed.x * deltaTime;
-    }
-    
-	if (IsKeyDown(KEY_SPACE) && player->state == Standing) {
-		player->object.speed.y = -VERTICAL_SPEED;
-		player->state = Jumping;
+	case Standing: {
+		if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) {
+			if (player->object.groundSpeed > 0) {
+				player->object.groundSpeed -= deceleration_speed;
+				if (player->object.groundSpeed <= 0) {
+					player->object.groundSpeed = -0.5;
+				}
+			}
+			else if (player->object.groundSpeed > -top_speed) {
+				player->object.groundSpeed -= acceleration_speed;
+				if (player->object.groundSpeed <= -top_speed) {
+					player->object.groundSpeed = -top_speed;
+				}
+			}
+		}
+		if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) {
+			if (player->object.groundSpeed < 0) {
+				player->object.groundSpeed += deceleration_speed;
+				if (player->object.groundSpeed >= 0) {
+					player->object.groundSpeed = 0.5;
+				}
+			}
+			else if (player->object.groundSpeed < top_speed) {
+				player->object.groundSpeed += acceleration_speed;
+				if (player->object.groundSpeed >= top_speed) {
+					player->object.groundSpeed = top_speed;
+				}
+			}
+		}
+
+		player->object.speed.x = player->object.groundSpeed;
+		player->object.position.x += player->object.speed.x * deltaTime * GetFPS();
+
+		if (IsKeyUp(KEY_D) && IsKeyUp(KEY_RIGHT) && IsKeyUp(KEY_A) && IsKeyUp(KEY_LEFT)) {
+			float min = fminf(abs(player->object.groundSpeed), friction_speed);
+			int sign;
+
+			if (player->object.groundSpeed == 0) {
+				sign = 0;
+			}
+			else if (player->object.groundSpeed > 0) {
+				sign = 1;
+			}
+			else {
+				sign = -1;
+			}
+
+			player->object.groundSpeed -= min * sign;
+		}
+
+		if (IsKeyDown(KEY_SPACE)) {
+			player->object.speed.y -= jump_force;
+			player->state = Jumping;
+			player->ascending = true;
+		}
+		break;
+	}
 	}
 	
-    bool hitObstacle = false;
-	for (int i = 0; i < env->count; i++) {
-		Tile tile = env->tiles[i];
-        float tileY = tile.position.y * tileLen() - 1;
-		float tileX = tile.position.x * tileLen();
-		if (tileX <= player->object.position.x &&
-			tileX + tileLen() >= player->object.position.x &&
-			tileY >= player->object.position.y &&
-			tileY <= player->object.position.y + player->object.speed.y * deltaTime) {
-			hitObstacle = true;
-			player->object.speed = (Vector2){ .x = 0.0f, .y = 0.0f };
-			player->object.position.y = tileY;
-			break;
-		}
-	}
-
-    if (!hitObstacle)
-    {
-        player->object.position.y += player->object.speed.y * deltaTime;
-		if (player->object.position.x - player->object.widthRadius >= env->minX && player->object.position.x + player->object.widthRadius <= env->maxX) {
-			player->object.position.x += player->object.speed.x * deltaTime;
-		}
-        player->object.speed.y += GRAVITY * deltaTime;
-        player->state = Jumping;
-    }
-    else player->state = Standing;
-    
+	checkFloorTile(env, player);
+	lastY = player->object.position.y;
 }
 
 void updateCamera(Camera2D* camera, Player* player, LevelEnv* env) {
@@ -113,4 +144,36 @@ void drawPlayer(Player* player) {
     float width = player->object.widthRadius * 2 + 1;
     float height = player->object.heightRadius * 2 + 1;
 	DrawRectangle(x, y, width, height, BLUE);
+}
+
+void checkFloorTile(LevelEnv* env, Player* player) {
+	if (player->ascending) return;
+
+	Vector2 aAnchor = getSensorPos(&player->object, A);
+	Vector2 bAnchor = getSensorPos(&player->object, B);
+
+	float snappingDistance = fminf(abs(player->object.speed.x) + 4, 14);
+	float minDistance = 33.f;
+	for (int i = 0; i < env->count; i++) {
+		Tile tile = env->tiles[i];
+		float tileY = tile.position.y * tileLen();
+		float tileX = tile.position.x * tileLen();
+
+		float aDist = 33.f;
+		if (tileX <= aAnchor.x && tileX + tileLen() >= aAnchor.x) {
+			aDist = tileY - aAnchor.y;
+		}
+		float bDist = 33.f;
+		if (tileX <= bAnchor.x && tileX + tileLen() >= bAnchor.x) {
+			bDist = tileY - bAnchor.y;
+		}
+		float winningDist = fminf(aDist, bDist);
+		if (abs(winningDist) < 14) {
+			player->object.speed.y = 0.f;
+			player->object.position.y = player->object.position.y + floor(winningDist) + player->object.heightRadius;
+			player->state = Standing;
+			player->ascending = false;
+			break;
+		}
+	}
 }

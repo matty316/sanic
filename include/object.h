@@ -2,10 +2,10 @@
 #define OBJECT
 
 #include "raylib.h"
+#include "environment.h"
 
 typedef struct Sensor {
 	bool enabled;
-	Vector2 position;
 } Sensor;
 
 typedef enum SensorId {
@@ -19,9 +19,8 @@ typedef struct Object {
 	float groundAngle;
 	float widthRadius;
 	float heightRadius;
-	Rectangle hitbox;
-	Rectangle bounds;
-	Sensor sensors[6];
 } Object;
+
+Vector2 getSensorPos(Object* o, SensorId sensorId);
 
 #endif // !OBJECT

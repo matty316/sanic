@@ -64,7 +64,7 @@ void initGreenHill(LevelEnv* env) {
 }
 
 void drawEnv(LevelEnv* env) {
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < env->count; i++) {
         Tile tile = env->tiles[i];
         for (int j = 0; j < 16; j++) {
             Vector2 size = { .x = 1 * TILE_SIZE * SCALE, .y = tile.heightMap[j] * SCALE };
