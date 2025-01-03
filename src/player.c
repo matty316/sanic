@@ -1,6 +1,7 @@
 #include "player.h"
 #include "common.h"
 #include "raymath.h"
+#include <math.h>
 #include <stdio.h>
 
 #define acceleration_speed	0.046875f * SCALE
@@ -92,7 +93,7 @@ void updatePlayer(Player* player, float deltaTime, LevelEnv* env) {
 		player->object.position.x += player->object.speed.x * deltaTime * GetFPS();
 
 		if (IsKeyUp(KEY_D) && IsKeyUp(KEY_RIGHT) && IsKeyUp(KEY_A) && IsKeyUp(KEY_LEFT)) {
-			float min = fminf(abs(player->object.groundSpeed), friction_speed);
+			float min = fminf(fabs(player->object.groundSpeed), friction_speed);
 			int sign;
 
 			if (player->object.groundSpeed == 0) {
@@ -152,7 +153,7 @@ void checkFloorTile(LevelEnv* env, Player* player) {
 	Vector2 aAnchor = getSensorPos(&player->object, A);
 	Vector2 bAnchor = getSensorPos(&player->object, B);
 
-	float snappingDistance = fminf(abs(player->object.speed.x) + 4, 14);
+	float snappingDistance = fminf(fabs(player->object.speed.x) + 4, 14);
 	float minDistance = 33.f;
 	for (int i = 0; i < env->count; i++) {
 		Tile tile = env->tiles[i];
@@ -168,7 +169,7 @@ void checkFloorTile(LevelEnv* env, Player* player) {
 			bDist = tileY - bAnchor.y;
 		}
 		float winningDist = fminf(aDist, bDist);
-		if (abs(winningDist) < 14) {
+		if (fabs(winningDist) < 14) {
 			player->object.speed.y = 0.f;
 			player->object.position.y = player->object.position.y + floor(winningDist) + player->object.heightRadius;
 			player->state = Standing;
